@@ -1256,21 +1256,37 @@ namespace TagLib.Id3v2 {
 			set {SetTextFrame (FrameType.TSOT, value);}
 		}
 
-		/// <summary>
-		///    Gets and sets the performers or artists who performed in
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string[]" /> containing the performers or
-		///    artists who performed in the media described by the
-		///    current instance or an empty array if no value is
-		///    present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "TPE1" Text
-		///    Information Frame.
-		/// </remarks>
-		public override string [] Performers {
+        /// <summary>
+        /// Colladeo extension - get the value of "Display Artist" used by MusicBee
+        /// </summary>
+        public override string DisplayArtist
+        {
+            get
+            {
+                string text = GetUserTextAsString("DISPLAY ARTIST", false);
+                if (text == null)
+                {
+                    return string.Empty;
+                }
+                return text;
+            }
+        }
+
+        /// <summary>
+        ///    Gets and sets the performers or artists who performed in
+        ///    the media described by the current instance.
+        /// </summary>
+        /// <value>
+        ///    A <see cref="string[]" /> containing the performers or
+        ///    artists who performed in the media described by the
+        ///    current instance or an empty array if no value is
+        ///    present.
+        /// </value>
+        /// <remarks>
+        ///    This property is implemented using the "TPE1" Text
+        ///    Information Frame.
+        /// </remarks>
+        public override string [] Performers {
 			get {return GetTextAsArray (FrameType.TPE1);}
 			set {SetTextFrame (FrameType.TPE1, value);}
 		}

@@ -196,6 +196,17 @@ namespace TagLib {
 			get {return null;}
 			set {}
 		}
+
+        /// <summary>
+        /// Colladeo extension - get the value of "Display Artist" used by MusicBee
+        /// </summary>
+        public virtual string DisplayArtist
+        {
+            get
+            {
+                return string.Empty;
+            }
+        }
 		
 		/// <summary>
 		///    Gets and sets the performers or artists who performed in

@@ -480,20 +480,36 @@ namespace TagLib.Ogg
 			set {SetField ("TITLESORT", value);}
 		}
 
-		/// <summary>
-		///    Gets and sets the performers or artists who performed in
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string[]" /> containing the performers or
-		///    artists who performed in the media described by the
-		///    current instance or an empty array if no value is
-		///    present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "ARTIST" field.
-		/// </remarks>
-		public override string [] Performers {
+        /// <summary>
+        /// Colladeo extension - get the value of "Display Artist" used by MusicBee
+        /// </summary>
+        public override string DisplayArtist
+        {
+            get
+            {
+                string text = GetFirstField("DISPLAY ARTIST");
+                if (text == null)
+                {
+                    return string.Empty;
+                }
+                return text;
+            }
+        }
+
+        /// <summary>
+        ///    Gets and sets the performers or artists who performed in
+        ///    the media described by the current instance.
+        /// </summary>
+        /// <value>
+        ///    A <see cref="string[]" /> containing the performers or
+        ///    artists who performed in the media described by the
+        ///    current instance or an empty array if no value is
+        ///    present.
+        /// </value>
+        /// <remarks>
+        ///    This property is implemented using the "ARTIST" field.
+        /// </remarks>
+        public override string [] Performers {
 			get {return GetField ("ARTIST");}
 			set {SetField ("ARTIST", value);}
 		}
@@ -895,12 +911,22 @@ namespace TagLib.Ogg
 		/// </remarks>
 		public override uint BeatsPerMinute {
 			get {
-				string text = GetFirstField ("TEMPO");
+				string tempo = GetFirstField ("TEMPO");
 				double value;
-				return (text != null &&
-					double.TryParse (text, out value) &&
-					value > 0) ? (uint) Math.Round (value) :
-					0;
+			    if (tempo != null &&
+			        double.TryParse(tempo, out value) &&
+			        value > 0)
+			    {
+			        return (uint) Math.Round(value);
+			    }
+				string bpm = GetFirstField("BPM");
+			    if (bpm != null &&
+			        double.TryParse(bpm, out value))
+			    {
+                    return (uint)Math.Round(value);
+                }
+
+			    return 0;
 			}
 			set {SetField ("TEMPO", value);}
 		}

@@ -483,16 +483,32 @@ namespace TagLib.Mpeg4 {
 				AppleAdditionalInfoBox nameBox =
 					(AppleAdditionalInfoBox)
 					box.GetChild(BoxType.Name);
-					
-				if (meanBox == null || nameBox == null ||
-					meanBox.Text != meanstring ||
-					nameBox.Text != namestring) {
-					} else {
-					return (AppleDataBox)box.GetChild(BoxType.Data);
-				}
-			}
-			// If we haven't returned the found box yet, there isn't one, return null
-			return null;
+                if (meanBox == null || nameBox == null) continue;
+
+                // Colladeo: I found that MusicBee, or some other software, adds an unprintable character at the beginning of the tag
+                // the comparison then fails
+                // So I added the regexp sanitization below
+                const string pattern = "[a-zA-Z0-9._ ]{1,}";
+                System.Text.RegularExpressions.Match match =
+                    System.Text.RegularExpressions.Regex.Match(meanBox.Text, pattern);
+                if (match.Captures.Count != 1) continue;
+                string realMeanTag = match.Captures[0].ToString();
+
+                match =
+                    System.Text.RegularExpressions.Regex.Match(nameBox.Text, pattern);
+                if (match.Captures.Count != 1) continue;
+                string realNameTag = match.Captures[0].ToString();
+
+                if (
+                    string.Equals(realMeanTag, meanstring, StringComparison.CurrentCultureIgnoreCase) &&
+                    string.Equals(realNameTag, namestring, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    var found = (AppleDataBox)box.GetChild(BoxType.Data);
+                    return found;
+                }
+            }
+            // If we haven't returned the found box yet, there isn't one, return null
+            return null;
 		}
 		
 		/// <summary>
@@ -626,21 +642,37 @@ namespace TagLib.Mpeg4 {
 				SetText (BoxType.Nam, value);
 			}
 		}
-		
-		/// <summary>
-		///    Gets and sets the performers or artists who performed in
-		///    the media described by the current instance.
-		/// </summary>
-		/// <value>
-		///    A <see cref="string[]" /> containing the performers or
-		///    artists who performed in the media described by the
-		///    current instance or an empty array if no value is
-		///    present.
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "@ART" data box.
-		/// </remarks>
-		public override string [] Performers {
+
+        /// <summary>
+        /// Colladeo extension - get the value of "Display Artist" used by MusicBee
+        /// </summary>
+        public override string DisplayArtist
+        {
+            get
+            {
+                string text = GetDashBox("com.apple.iTunes", "DISPLAY ARTIST");
+                if (text == null)
+                {
+                    return string.Empty;
+                }
+                return text;
+            }
+        }
+
+        /// <summary>
+        ///    Gets and sets the performers or artists who performed in
+        ///    the media described by the current instance.
+        /// </summary>
+        /// <value>
+        ///    A <see cref="string[]" /> containing the performers or
+        ///    artists who performed in the media described by the
+        ///    current instance or an empty array if no value is
+        ///    present.
+        /// </value>
+        /// <remarks>
+        ///    This property is implemented using the "@ART" data box.
+        /// </remarks>
+        public override string [] Performers {
 			get {return GetText (BoxType.Art);}
 			set {SetText (BoxType.Art, value);}
 		}
@@ -1186,19 +1218,58 @@ namespace TagLib.Mpeg4 {
 			set {SetText (BoxType.Sonm, value);}
 		}
 
-		/// <summary>
-		///    Gets and sets the MusicBrainz ArtistID
-		/// </summary>
-		/// <value>
-		///    A <see cref="string" /> containing the MusicBrainz
-		///    ArtistID for the media described by the current 
-		///    instance, or null if no value is present. 
-		/// </value>
-		/// <remarks>
-		///    This property is implemented using the "dash"/"----" box type.
-		///    http://musicbrainz.org/doc/PicardTagMapping
-		/// </remarks>
-		public override string MusicBrainzArtistId {
+        /// <summary>
+        /// Colladeo added: get the track replaygain value
+        /// </summary>
+        public override double ReplayGainTrackGain
+        {
+            get
+            {
+                string text = GetDashBox("com.apple.iTunes", "replaygain_track_gain");
+                double value;
+                if (text == null)
+                {
+                    return double.NaN;
+                }
+                // Colladeo changed: remove non-printing character that I found MusicBee inserted at index 0 (there could be more)
+                var match =
+                    System.Text.RegularExpressions.Regex.Match(text, "[0-9.,-]{1,}");
+                if (match.Captures.Count == 0)
+                    return double.NaN;
+
+                text = match.Captures[0].ToString();
+
+                // Colladeo changed: try parsing using both the US format (dot as a decimal point) as well as German (comma used instead)
+                if (double.TryParse(text, NumberStyles.Float,
+                    new CultureInfo("en-US"), out value) ||
+                    double.TryParse(text, NumberStyles.Float,
+                    new CultureInfo("de"), out value))
+                {
+                    return value;
+                }
+                return double.NaN;
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+
+        /// <summary>
+        ///    Gets and sets the MusicBrainz ArtistID
+        /// </summary>
+        /// <value>
+        ///    A <see cref="string" /> containing the MusicBrainz
+        ///    ArtistID for the media described by the current 
+        ///    instance, or null if no value is present. 
+        /// </value>
+        /// <remarks>
+        ///    This property is implemented using the "dash"/"----" box type.
+        ///    http://musicbrainz.org/doc/PicardTagMapping
+        /// </remarks>
+        public override string MusicBrainzArtistId {
 			get {return GetDashBox("com.apple.iTunes","MusicBrainz Artist Id");}
 			set {SetDashBox("com.apple.iTunes", "MusicBrainz Artist Id", value);}
 		}
