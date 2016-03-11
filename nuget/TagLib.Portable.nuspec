@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>TagLib.Portable</id>
-        <version>1.0.2-pre</version>
+        <version>1.0.4</version>
         <title>TagLib# Portable</title>
         <authors>Tim Heuer</authors>
         <owners>Tim Heuer</owners>
@@ -11,10 +11,10 @@
         <iconUrl>https://raw.githubusercontent.com/timheuer/taglib-sharp-portable/master/nuget/taglib.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>TagLib# is a library to read ID3 and other metadat format from files.  This is a popular metadata format for audio/video files to extract artist/title/album art.  This is an implementation of TagLib# forked for forward progress using .NET Portable profiles.</description>
-        <releaseNotes>1.0.2-pre: Fix #4 using Dispose on Stream for IFileAbstraction impelementations.</releaseNotes>
+        <releaseNotes>1.0.4: Fix #5 Stackoverflow Exception When Saving (thanks RafaelYousuf).</releaseNotes>
         <tags>taglib id3lib id3 aac mp3 tag winrt xamarin pcl</tags>
     </metadata>
     <files>
-        <file src="..\src\TagLib.Portable\bin\Release\TagLib.Portable.dll" target="lib\portable-net45+win8+wpa81\TagLib.Portable.dll" />
+        <file src="..\src\TagLib.Portable\bin\Release\TagLib.Portable.dll" target="lib\portable-net45+win+wpa81+wp8+MonoAndroid10+xamarinios10+MonoTouch10\TagLib.Portable.dll" />
     </files>
 </package>
