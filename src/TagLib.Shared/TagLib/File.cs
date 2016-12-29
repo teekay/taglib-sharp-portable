@@ -405,22 +405,22 @@ namespace TagLib {
             }
 			set 
             {
-				if (Mode == value || (Mode == AccessMode.Write
-					&& value == AccessMode.Read))
-					return;
-				
-				if (file_stream != null)
-					file_abstraction.CloseStream (file_stream);
-				
-				file_stream = null;
-				
-				if (value == AccessMode.Read)
-					file_stream = file_abstraction.ReadStream;
-				else if (value == AccessMode.Write)
-					file_stream = file_abstraction.WriteStream;
-				
-				Mode = value;
-			}
+                if (Mode == value || (Mode == AccessMode.Write
+                    && value == AccessMode.Read))
+                    return;
+
+                //if (file_stream != null)                              //Closing a stream here is causing code to throw System.ObjectDisposedException exception
+                //	file_abstraction.CloseStream (file_stream);         //Closing the stream should be done by the caller.
+
+                file_stream = null;
+
+                if (value == AccessMode.Read)
+                    file_stream = file_abstraction.ReadStream;
+                else if (value == AccessMode.Write)
+                    file_stream = file_abstraction.WriteStream;
+                else if (value == AccessMode.Closed)                    //To avoid StackOverflowException 
+                    Mode = value;
+            }
 		}
 		
 		/// <summary>
